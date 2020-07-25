@@ -20,6 +20,13 @@ impl PixelCluster {
         cluster
     }
 
+    pub const fn new_empty(center: PixelCieLab) -> PixelCluster {
+        PixelCluster {
+            pixels: Vec::new(),
+            center: center
+        }
+    }
+
     pub fn calculate_center(&self) -> PixelCieLab {
         
         let position_center = 
