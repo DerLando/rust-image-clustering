@@ -35,6 +35,7 @@ impl ColorCieLab {
     pub fn l(&self) -> f32 {self.values[0]}
     pub fn a(&self) -> f32 {self.values[1]}
     pub fn b(&self) -> f32 {self.values[2]}
+    pub fn values(&self) -> &Vector3<f32> {&self.values}
 
     pub const fn new(l: f32, a: f32, b: f32) -> ColorCieLab {
         ColorCieLab{
