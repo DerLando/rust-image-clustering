@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 cgmath = "0.17.0"
 image = "0.23.7"
+num = "0.3.0"
 
 [dev-dependencies]
 rand = "*"
