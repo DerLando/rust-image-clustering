@@ -1,4 +1,5 @@
 use super::{ColorXyz};
+use cgmath::Vector3;
 
 // d65 CIE 1931 reference values for rgb color space conversion
 const REFERENCE_X: f32 = 95.047;
@@ -27,28 +28,36 @@ fn convert_to_pre_xyz(value: f32) -> f32 {
 
 #[derive(Debug)]
 pub struct ColorCieLab {
-    pub L: f32,
-    pub a: f32,
-    pub b: f32,
+    values: Vector3<f32>
 }
 
 impl ColorCieLab {
+    pub fn l(&self) -> f32 {self.values[0]}
+    pub fn a(&self) -> f32 {self.values[1]}
+    pub fn b(&self) -> f32 {self.values[2]}
+
+    pub const fn new(l: f32, a: f32, b: f32) -> ColorCieLab {
+        ColorCieLab{
+            values: Vector3::new(l, a, b)
+        }
+    }
+
     pub fn new_from_xyz(xyz: &ColorXyz) -> ColorCieLab {
         let x = convert_to_pre_lab(xyz.x / REFERENCE_X);
         let y = convert_to_pre_lab(xyz.y / REFERENCE_Y);
         let z = convert_to_pre_lab(xyz.z / REFERENCE_Z);
 
-        ColorCieLab {
-            L: 116.0 * y - 16.0,
-            a: 500.0 * (x - y),
-            b: 200.0 * (y - z)
-        }
+        ColorCieLab::new(
+            116.0 * y - 16.0, 
+            500.0 * (x - y), 
+            200.0 * (y - z)
+        )
     }
 
     pub fn as_xyz(&self) -> ColorXyz {
-        let y = (self.L as f32 + 16.0) / 116.0;
-        let x = self.a as f32 / 500.0 + y;
-        let z = y - self.b as f32 / 200.0;
+        let y = (self.l() as f32 + 16.0) / 116.0;
+        let x = self.a() as f32 / 500.0 + y;
+        let z = y - self.b() as f32 / 200.0;
 
         ColorXyz{
             x: convert_to_pre_xyz(x) * REFERENCE_X,
@@ -68,7 +77,7 @@ mod test {
     fn convert_from_xyz_to_cielab_and_back_should_be_identity() {
         let mut rng = rand::thread_rng();
 
-        for i in 0..100 {
+        for _i in 0..100 {
             let r = rng.gen_range(0, 256) as u8;
             let g = rng.gen_range(0, 256) as u8;
             let b = rng.gen_range(0, 256) as u8;
