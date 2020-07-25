@@ -30,11 +30,11 @@ fn convert_to_pre_rgb(value: f32) -> f32 {
     (result * 255.0).round()
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ColorXyz{
-    x: f32,
-    y: f32,
-    z: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 impl ColorXyz {
@@ -70,7 +70,7 @@ impl ColorXyz {
 }
 
 #[cfg(test)]
-mod ColoryXyzTests {
+mod test {
 
     use crate::colors::{ColorRgb, ColorXyz};
     use rand::Rng;
