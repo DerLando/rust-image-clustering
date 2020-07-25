@@ -39,9 +39,9 @@ pub struct ColorXyz{
 
 impl ColorXyz {
     pub fn new_from_rgb(rgb: &ColorRgb) -> ColorXyz {
-        let r = convert_to_pre_xyz(normalize_rgb(rgb.r));
-        let g = convert_to_pre_xyz(normalize_rgb(rgb.g));
-        let b = convert_to_pre_xyz(normalize_rgb(rgb.b));
+        let r = convert_to_pre_xyz(normalize_rgb(rgb.r()));
+        let g = convert_to_pre_xyz(normalize_rgb(rgb.g()));
+        let b = convert_to_pre_xyz(normalize_rgb(rgb.b()));
         
         ColorXyz{
             x: r * 0.4124 + g * 0.3576 + b * 0.1805,
@@ -60,11 +60,11 @@ impl ColorXyz {
         let g = x * -0.9689 + y * 1.8758 + z * 0.0415;
         let b = x * 0.0557 + y * -0.2040 + z * 1.0570;
 
-        ColorRgb{
-            r: convert_to_pre_rgb(r) as u8,
-            g: convert_to_pre_rgb(g) as u8,
-            b: convert_to_pre_rgb(b) as u8,
-        }
+        ColorRgb::new(
+            convert_to_pre_rgb(r) as u8,
+            convert_to_pre_rgb(g) as u8,
+            convert_to_pre_rgb(b) as u8
+        )
     }
 
 }
@@ -86,7 +86,7 @@ mod test {
             let b = rng.gen_range(0, 256) as u8;
 
             // Arrange
-            let rgb = ColorRgb{r, g, b};
+            let rgb = ColorRgb::new(r, g, b);
             let xyz = ColorXyz::new_from_rgb(&rgb);
 
             // Act

@@ -83,7 +83,7 @@ mod test {
             let b = rng.gen_range(0, 256) as u8;
 
             // Arrange
-            let rgb = ColorRgb{r, g, b};
+            let rgb = ColorRgb::new(r, g, b);
             let xyz = ColorXyz::new_from_rgb(&rgb);
             let cie = ColorCieLab::new_from_xyz(&xyz);
 
