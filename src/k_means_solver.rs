@@ -1,10 +1,9 @@
 use crate::pixels::{PixelCieLab, Grid};
-use crate::cluster::PixelCluster;
 use num::integer::Roots;
 use rand::thread_rng;
 use rand_distr::{Distribution, Alphanumeric, Uniform, Standard, Poisson};
 use std::collections::HashMap;
-use cgmath::Vector2;
+use cgmath::Point2;
 
 struct LabelPixel {
     pixel: PixelCieLab,
@@ -162,13 +161,15 @@ impl KMeansSuperPixelSolver {
     }
 
     fn update_centroids(&mut self) {
-        let mut clusters: Vec<Vec<&Vector2<f32>>> = Vec::with_capacity(self.k);
+        let mut clusters: Vec<Vec<&Point2<u32>>> = Vec::with_capacity(self.k);
         for _ in 0..self.k {clusters.push(Vec::new())}
 
         for pixel in self.pixels() {
             clusters[pixel.centroid_index].push(&pixel.pixel().values())
         }
 
-        
+        // let centroids = 
+        //     clusters.iter()
+        //     .map(|c|)
     }
 }

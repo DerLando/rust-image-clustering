@@ -1,6 +1,5 @@
 mod colors;
 mod pixels;
-mod cluster;
 mod k_means_solver;
 
 use image::{DynamicImage, GenericImage, GenericImageView, Rgb};
@@ -13,7 +12,7 @@ fn pixel_from_rgb(x: u32, y: u32, rgb: &Rgb<u8>) -> PixelCieLab {
     let xyz = ColorXyz::new_from_rgb(&c_rgb);
     let cie = ColorCieLab::new_from_xyz(&xyz);
 
-    PixelCieLab::new(x as f32, y as f32, cie)
+    PixelCieLab::new(x, y, cie)
 }
 
 fn test_generate_pixels(image: DynamicImage) {
