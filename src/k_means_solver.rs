@@ -1,9 +1,11 @@
 use crate::pixels::{PixelCieLab, Grid};
+use crate::colors::ColorCieLab;
 use num::integer::Roots;
 use rand::thread_rng;
 use rand_distr::{Distribution, Alphanumeric, Uniform, Standard, Poisson};
 use std::collections::HashMap;
-use cgmath::Point2;
+use cgmath::{Point2, EuclideanSpace};
+use image::Rgb;
 
 struct LabelPixel {
     pixel: PixelCieLab,
@@ -15,7 +17,7 @@ impl LabelPixel {
     pub const fn new(pixel: PixelCieLab) -> LabelPixel {
         LabelPixel {
             pixel,
-            centroid_distance: 0.0,
+            centroid_distance: std::f32::MAX,
             centroid_index: 0
         }
     }
@@ -72,7 +74,7 @@ impl KMeansSuperPixelSolver {
         };
 
         solver.calculate_initial_centroids();
-
+        println!("initial centroids: {:?}", solver.centroid_indices);
         solver.assign_pixels_to_superpixels();
 
         solver
@@ -117,12 +119,17 @@ impl KMeansSuperPixelSolver {
             .collect()
     }
 
-    fn pixel(&self, x: usize, y: usize) -> &LabelPixel {
-        &self.flat_pixels[Self::get_index(x, y, self.height)]
+    fn pixel(&self, position: impl Into<Point2<u32>>) -> &LabelPixel {
+        let point: Point2<u32> = position.into();
+        &self.flat_pixels[Self::get_index(point.x as usize, point.y as usize, self.height)]
     }
 
     fn pixel_mut(&mut self, x: usize, y: usize) -> &mut LabelPixel {
         &mut self.flat_pixels[Self::get_index(x, y, self.height)]
+    }
+
+    fn color(&self, position: impl Into<Point2<u32>>) -> ColorCieLab {
+        self.pixel(position).pixel().color().clone()
     }
 
     fn pixels(&self) -> &Vec<LabelPixel> {&self.flat_pixels}
@@ -138,7 +145,8 @@ impl KMeansSuperPixelSolver {
             .collect();
 
         
-        for centroid in centroids{
+        for i in 0..self.k{
+            let centroid = &centroids[i];
             let centroid_x = centroid.values().x;
             let centroid_y = centroid.values().y;
 
@@ -154,22 +162,66 @@ impl KMeansSuperPixelSolver {
                 if pixel.centroid_distance < distance {continue;}
 
                 pixel.centroid_distance = distance;
-                pixel.centroid_index = 0;
+                pixel.centroid_index = i;
             }
         }
         
     }
 
-    fn update_centroids(&mut self) {
-        let mut clusters: Vec<Vec<&Point2<u32>>> = Vec::with_capacity(self.k);
+    fn position_centroid(positions: &Vec<Point2<u32>>) -> Point2<u32> {
+        // Point2::centroid(&positions.iter().map(|p| p.cast().unwrap()).collect::<Vec<Point2<u32>>>()[..])
+        match positions.len() == 0 {
+            true => return Point2::from((0, 0)),
+            false => return Point2::centroid(&positions[..])
+        }
+    }
+
+    fn position_clusters(&self) -> Vec<Vec<Point2<u32>>> {
+        let mut clusters: Vec<Vec<Point2<u32>>> = Vec::with_capacity(self.k);
         for _ in 0..self.k {clusters.push(Vec::new())}
 
         for pixel in self.pixels() {
-            clusters[pixel.centroid_index].push(&pixel.pixel().values())
+            clusters[pixel.centroid_index].push(*pixel.pixel().values())
         }
 
-        // let centroids = 
-        //     clusters.iter()
-        //     .map(|c|)
+        clusters
+    }
+
+    fn position_centroids(&self) -> Vec<Point2<u32>> {
+        println!("Calculating position centroids");
+        self.position_clusters().iter()
+            .map(|c| Self::position_centroid(c))
+            .collect()
+    }
+
+    fn update_centroids(&mut self) {
+        println!("Updating position centroids");
+        self.centroid_indices = 
+            self.position_centroids().iter()
+            .map(|c| Self::get_index(c.x as usize, c.y as usize, self.height)).collect();
+    }
+
+    pub fn solve_tick(&mut self) {
+        println!("Solving tick...");
+        println!("Assigning pixels to superpixels...");
+        self.assign_pixels_to_superpixels();
+        println!("Updating centroids...");
+        self.update_centroids();
+    }
+
+    pub fn current_superpixels(&self) -> Vec<Vec<(u32, u32, Rgb<u8>)>> {
+        let mut result: Vec<Vec<(u32, u32, Rgb<u8>)>> = Vec::with_capacity(self.k);
+
+        for cluster in self.position_clusters() {
+            result.push(
+                cluster.iter()
+                .map(|c|
+                    (c.x, c.y, self.color(*c).as_xyz().as_rgb().as_image_rgb())).collect());
+        }
+
+        let counts: Vec<usize> = result.iter().map(|r| r.len()).collect();
+        println!("Generated superpixel counts: {:?}", counts);
+
+        result
     }
 }

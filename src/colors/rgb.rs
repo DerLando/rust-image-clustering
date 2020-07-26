@@ -1,4 +1,5 @@
 use cgmath::Vector3;
+use image::Rgb;
 
 
 #[derive(Debug, PartialEq)]
@@ -16,5 +17,7 @@ impl ColorRgb {
             values: Vector3::new(r, g, b)
         }
     }
+
+    pub fn as_image_rgb(&self) -> Rgb<u8> {Rgb::from([self.r(), self.g(), self.b()])}
 }
 
