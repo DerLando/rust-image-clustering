@@ -26,7 +26,7 @@ fn convert_to_pre_xyz(value: f32) -> f32 {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ColorCieLab {
     values: Vector3<f32>
 }
