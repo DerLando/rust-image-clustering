@@ -10,5 +10,5 @@ mod cie_lab;
 pub enum Color {
     Rgb(ColorRgb),
     Xyz(ColorXyz),
-    CieLab(ColorCieLab)
+    CieLab(ColorCieLab),
 }

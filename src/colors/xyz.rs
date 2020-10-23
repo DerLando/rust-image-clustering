@@ -1,4 +1,4 @@
-use super::{ColorRgb};
+use super::ColorRgb;
 
 fn normalize_rgb(rgb: u8) -> f32 {
     rgb as f32 / 255.0
@@ -11,7 +11,7 @@ fn convert_to_pre_xyz(value: f32) -> f32 {
 
     match value > TRESHHOLD {
         true => result = ((value + 0.055) / 1.055).powf(2.4),
-        false => result = value / 12.92
+        false => result = value / 12.92,
     };
 
     result * 100.0
@@ -24,14 +24,14 @@ fn convert_to_pre_rgb(value: f32) -> f32 {
 
     match value > TRESHHOLD {
         true => result = 1.055 * value.powf(1.0 / 2.4) - 0.055,
-        false => result = 12.92 * value
+        false => result = 12.92 * value,
     }
 
     (result * 255.0).round()
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ColorXyz{
+pub struct ColorXyz {
     pub x: f32,
     pub y: f32,
     pub z: f32,
@@ -42,16 +42,15 @@ impl ColorXyz {
         let r = convert_to_pre_xyz(normalize_rgb(rgb.r()));
         let g = convert_to_pre_xyz(normalize_rgb(rgb.g()));
         let b = convert_to_pre_xyz(normalize_rgb(rgb.b()));
-        
-        ColorXyz{
+
+        ColorXyz {
             x: r * 0.4124 + g * 0.3576 + b * 0.1805,
             y: r * 0.2126 + g * 0.7152 + b * 0.0722,
-            z: r * 0.0193 + g * 0.1192 + b * 0.9505
+            z: r * 0.0193 + g * 0.1192 + b * 0.9505,
         }
     }
 
     pub fn as_rgb(&self) -> ColorRgb {
-
         let x = self.x / 100.0;
         let y = self.y / 100.0;
         let z = self.z / 100.0;
@@ -63,10 +62,9 @@ impl ColorXyz {
         ColorRgb::new(
             convert_to_pre_rgb(r) as u8,
             convert_to_pre_rgb(g) as u8,
-            convert_to_pre_rgb(b) as u8
+            convert_to_pre_rgb(b) as u8,
         )
     }
-
 }
 
 #[cfg(test)]
@@ -77,7 +75,6 @@ mod test {
 
     #[test]
     fn converting_from_rgb_to_xyz_and_back_should_be_identity() {
-
         let mut rng = rand::thread_rng();
 
         for i in 0..100 {

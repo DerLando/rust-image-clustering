@@ -1,4 +1,4 @@
-use super::{ColorXyz};
+use super::ColorXyz;
 use cgmath::Vector3;
 
 // d65 CIE 1931 reference values for rgb color space conversion
@@ -11,35 +11,43 @@ fn convert_to_pre_lab(value: f32) -> f32 {
 
     match value > TRESHHOLD {
         true => return value.powf(1.0 / 3.0),
-        false => return 7.787 * value + 16.0 / 116.0
+        false => return 7.787 * value + 16.0 / 116.0,
     }
 }
 
 fn convert_to_pre_xyz(value: f32) -> f32 {
     const TRESHHOLD: f32 = 0.008856;
-    
+
     let pow = value.powi(3);
 
     match pow > TRESHHOLD {
         true => return pow,
-        false => return (value - 16.0 / 116.0) / 7.787
+        false => return (value - 16.0 / 116.0) / 7.787,
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct ColorCieLab {
-    values: Vector3<f32>
+    values: Vector3<f32>,
 }
 
 impl ColorCieLab {
-    pub fn l(&self) -> f32 {self.values[0]}
-    pub fn a(&self) -> f32 {self.values[1]}
-    pub fn b(&self) -> f32 {self.values[2]}
-    pub fn values(&self) -> &Vector3<f32> {&self.values}
+    pub fn l(&self) -> f32 {
+        self.values[0]
+    }
+    pub fn a(&self) -> f32 {
+        self.values[1]
+    }
+    pub fn b(&self) -> f32 {
+        self.values[2]
+    }
+    pub fn values(&self) -> &Vector3<f32> {
+        &self.values
+    }
 
     pub const fn new(l: f32, a: f32, b: f32) -> ColorCieLab {
-        ColorCieLab{
-            values: Vector3::new(l, a, b)
+        ColorCieLab {
+            values: Vector3::new(l, a, b),
         }
     }
 
@@ -48,11 +56,7 @@ impl ColorCieLab {
         let y = convert_to_pre_lab(xyz.y / REFERENCE_Y);
         let z = convert_to_pre_lab(xyz.z / REFERENCE_Z);
 
-        ColorCieLab::new(
-            116.0 * y - 16.0, 
-            500.0 * (x - y), 
-            200.0 * (y - z)
-        )
+        ColorCieLab::new(116.0 * y - 16.0, 500.0 * (x - y), 200.0 * (y - z))
     }
 
     pub fn as_xyz(&self) -> ColorXyz {
@@ -60,10 +64,10 @@ impl ColorCieLab {
         let x = self.a() as f32 / 500.0 + y;
         let z = y - self.b() as f32 / 200.0;
 
-        ColorXyz{
+        ColorXyz {
             x: convert_to_pre_xyz(x) * REFERENCE_X,
             y: convert_to_pre_xyz(y) * REFERENCE_Y,
-            z: convert_to_pre_xyz(z) * REFERENCE_Z
+            z: convert_to_pre_xyz(z) * REFERENCE_Z,
         }
     }
 }
@@ -71,7 +75,7 @@ impl ColorCieLab {
 #[cfg(test)]
 mod test {
 
-    use crate::colors::{ColorRgb, ColorXyz, ColorCieLab};
+    use crate::colors::{ColorCieLab, ColorRgb, ColorXyz};
     use rand::Rng;
 
     #[test]
@@ -93,6 +97,6 @@ mod test {
 
             // Assert
             assert_eq!(rgb, converted);
-        }        
+        }
     }
 }
